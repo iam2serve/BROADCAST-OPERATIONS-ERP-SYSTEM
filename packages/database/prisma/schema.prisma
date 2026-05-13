@@ -1,0 +1,1506 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+enum SalaryType {
+  DAILY
+  EVENT
+  MONTHLY
+  HYBRID
+}
+
+enum Carrier {
+  VODAFONE
+  ORANGE
+  ETISALAT
+  WE
+}
+
+enum ExpenseCategory {
+  FUEL
+  FOOD
+  HOTEL
+  TRANSPORTATION
+  INTERNET
+  SIM_RECHARGE
+  REPAIR
+  EMERGENCY
+  MISC
+}
+
+enum DeviceType {
+  LIVEU
+  TVU
+  DEJERO
+  SRT
+  CUSTOM
+}
+
+enum FirmwareStatus {
+  UNKNOWN
+  UP_TO_DATE
+  UPDATE_AVAILABLE
+  OUTDATED
+  FAILED
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PASSWORD_RESET_REQUIRED
+}
+
+enum PreferredLanguage {
+  EN
+  AR
+}
+
+enum ThemePreference {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+enum OperatorStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+}
+
+enum EventStatus {
+  DRAFT
+  PLANNED
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ResourceStatus {
+  AVAILABLE
+  ASSIGNED
+  MAINTENANCE
+  LOST
+  RETIRED
+}
+
+enum MaintenanceStatus {
+  OK
+  DUE
+  IN_PROGRESS
+  BLOCKED
+}
+
+enum AssetType {
+  DEVICE
+  SIM
+  ROUTER
+  OPERATOR
+}
+
+enum AssignmentStatus {
+  RESERVED
+  ACTIVE
+  RELEASED
+  CANCELLED
+  COMPLETED
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  REIMBURSED
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
+enum TransactionType {
+  SALARY
+  ADVANCE
+  DEDUCTION
+  PAYROLL_PAYOUT
+  EXPENSE
+  REIMBURSEMENT
+  EVENT_PAYMENT
+  SIM_RECHARGE
+  REPAIR
+  ADJUSTMENT
+}
+
+enum PayrollPeriodStatus {
+  OPEN
+  PROCESSING
+  FINALIZED
+  CANCELLED
+}
+
+enum PayoutStatus {
+  DRAFT
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+enum PayrollAdjustmentType {
+  ADVANCE
+  DEDUCTION
+  OVERTIME
+  BONUS
+}
+
+enum FinancialLockType {
+  EVENT
+  PAYROLL_PERIOD
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  SMS
+  WHATSAPP
+}
+
+enum WorkerJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AutomationRuleStatus {
+  ACTIVE
+  PAUSED
+  DISABLED
+}
+
+enum AutomationTriggerType {
+  SIM_PACKAGE_EXPIRY
+  EVENT_STARTING_SOON
+  DEVICE_OFFLINE
+  EXPENSE_PENDING_TOO_LONG
+  ASSIGNMENT_CONFLICT
+  OVERDUE_REIMBURSEMENT
+  SCHEDULED
+}
+
+enum ReportType {
+  EVENT_PROFITABILITY
+  OPERATOR_PAYOUTS
+  SIM_UTILIZATION
+  DEVICE_UTILIZATION
+  ASSIGNMENT_HISTORY
+  EXPENSE_BREAKDOWN
+  PAYROLL_SUMMARY
+}
+
+enum ReportExportFormat {
+  JSON
+  CSV
+  PDF
+}
+
+enum ReportRunStatus {
+  QUEUED
+  COMPLETED
+  FAILED
+}
+
+enum SyncConflictStatus {
+  OPEN
+  RESOLVED
+  DISCARDED
+}
+
+enum SyncConflictResolution {
+  SERVER_WINS
+  CLIENT_RETRY
+  MANUAL_REVIEW
+  MERGE_SAFE_FIELDS
+}
+
+enum FileOwnerType {
+  EVENT
+  DEVICE
+  OPERATOR
+  EXPENSE
+}
+
+enum SyncOperationStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CONFLICT
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  legalName String?
+  taxNumber String?
+  status    String   @default("ACTIVE")
+
+  branches  Branch[]
+  users     User[]
+  roles     Role[]
+  invitations UserInvitation[]
+  events    Event[]
+  devices   BroadcastDevice[]
+  sims      SimCard[]
+  routers   Router[]
+  operators OperatorProfile[]
+  expenses  Expense[]
+  files     FileAsset[]
+  financialTransactions FinancialTransaction[]
+  salaryProfiles SalaryProfile[]
+  payrollPeriods PayrollPeriod[]
+  payrollPayouts PayrollPayout[]
+  payrollAdjustments PayrollAdjustment[]
+  financialLocks FinancialLock[]
+  notificationTemplates NotificationTemplate[]
+  workerJobs WorkerJob[]
+  automationRules AutomationRule[]
+  reportRuns ReportRun[]
+  quotas OrganizationQuota?
+  apiUsage ApiUsageEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
+
+model Branch {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  name    String
+  address String?
+  phone   String?
+
+  users     User[]
+  invitations UserInvitation[]
+  events    Event[]
+  devices   BroadcastDevice[]
+  sims      SimCard[]
+  routers   Router[]
+  operators OperatorProfile[]
+  expenses  Expense[]
+  files     FileAsset[]
+  automationRules AutomationRule[]
+  reportRuns ReportRun[]
+  salaryProfiles SalaryProfile[]
+  payrollPeriods PayrollPeriod[]
+  payrollPayouts PayrollPayout[]
+  payrollAdjustments PayrollAdjustment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model User {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+
+  email        String
+  passwordHash String
+  fullName     String
+  phone        String?
+  status       UserStatus @default(ACTIVE)
+
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  operatorProfile         OperatorProfile?
+  preferences             UserPreferences?
+  invitationsSent         UserInvitation[]       @relation("UserInvitationInvitedBy")
+  invitationAccepted      UserInvitation[]       @relation("UserInvitationAcceptedBy")
+  sessions                Session[]
+  passwordResetTokens     PasswordResetToken[]
+  createdExpenses         Expense[]              @relation("ExpenseCreatedBy")
+  approvedExpenses        Expense[]              @relation("ExpenseApprovedBy")
+  financialTransactions   FinancialTransaction[] @relation("FinancialTransactionCreatedBy")
+  reviewedExpenses        Expense[]              @relation("ExpenseReviewedBy")
+  reimbursedExpenses      Expense[]              @relation("ExpenseReimbursedBy")
+  payrollPayoutsCreated   PayrollPayout[]        @relation("PayrollPayoutCreatedBy")
+  payrollAdjustmentsCreated PayrollAdjustment[]   @relation("PayrollAdjustmentCreatedBy")
+  financialLocksCreated   FinancialLock[]        @relation("FinancialLockCreatedBy")
+  simPackageHistory       SimPackageHistory[]
+  auditLogs               AuditLog[]
+  notifications           Notification[]
+  notificationTemplates   NotificationTemplate[]
+  automationRules         AutomationRule[]
+  reportRuns              ReportRun[]
+  syncConflictsResolved   SyncConflict[]          @relation("SyncConflictResolvedBy")
+  uploadedFiles           FileAsset[]
+  eventActivityLogs       EventActivityLog[]
+  assignedAssetHistory    AssetOwnershipHistory[] @relation("AssetAssignedTo")
+  assignedByAssetHistory  AssetOwnershipHistory[] @relation("AssetAssignedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([roleId])
+  @@index([deletedAt])
+}
+
+model Role {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  name        String
+  description String?
+
+  users       User[]
+  invitations UserInvitation[]
+  permissions RolePermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Permission {
+  id          String @id @default(uuid())
+  key         String @unique
+  description String?
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+model Session {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  refreshTokenHash String
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+model UserPreferences {
+  id                   String            @id @default(uuid())
+  userId               String            @unique
+  user                 User              @relation(fields: [userId], references: [id])
+  language             PreferredLanguage @default(EN)
+  theme                ThemePreference   @default(SYSTEM)
+  timezone             String            @default("Africa/Cairo")
+  dashboardPreferences Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserInvitation {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+
+  email     String
+  fullName  String
+  phone     String?
+  roleId    String
+  role      Role   @relation(fields: [roleId], references: [id])
+
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  invitedById String
+  invitedBy   User     @relation("UserInvitationInvitedBy", fields: [invitedById], references: [id])
+  acceptedById String?
+  acceptedBy   User?    @relation("UserInvitationAcceptedBy", fields: [acceptedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([email])
+  @@index([expiresAt])
+  @@index([revokedAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model OperatorProfile {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  nationalId String? @unique
+  address    String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  notes      String?
+  role       String
+  salaryType SalaryType
+  dailyRate  Decimal? @db.Decimal(14, 2)
+  eventRate  Decimal? @db.Decimal(14, 2)
+  status     OperatorStatus @default(ACTIVE)
+
+  eventAssignments EventOperatorAssignment[]
+  expenses         Expense[]
+  salaryProfiles   SalaryProfile[]
+  payrollPayouts   PayrollPayout[]
+  payrollAdjustments PayrollAdjustment[]
+  files            FileAsset[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([deletedAt])
+}
+
+model Event {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+
+  name       String
+  clientName String
+  location   String?
+  startsAt   DateTime
+  endsAt     DateTime
+  status     EventStatus @default(DRAFT)
+  isDraft    Boolean     @default(true)
+  eventColor String?
+  eventTag   String?
+  cooldownBeforeMinutes Int @default(0)
+  cooldownAfterMinutes  Int @default(0)
+  estimatedCrewSize     Int?
+  notes      String?
+
+  estimatedBudget  Decimal? @db.Decimal(14, 2)
+  estimatedRevenue Decimal? @db.Decimal(14, 2)
+  estimatedProfit  Decimal? @db.Decimal(14, 2)
+  actualProfit     Decimal? @db.Decimal(14, 2)
+
+  operators    EventOperatorAssignment[]
+  devices      EventDeviceAssignment[]
+  routers      EventRouterAssignment[]
+  sims         EventSimAssignment[]
+  expenses     Expense[]
+  transactions FinancialTransaction[]
+  financialSnapshots EventFinancialSnapshot[]
+  financialLocks FinancialLock[]
+  files        FileAsset[]
+  timeline     EventActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([startsAt, endsAt])
+  @@index([status])
+  @@index([isDraft])
+  @@index([deletedAt])
+}
+
+model AssetMaintenanceWindow {
+  id             String    @id @default(uuid())
+  organizationId String
+  branchId       String?
+  assetType      AssetType
+  assetId        String
+  startsAt       DateTime
+  endsAt         DateTime
+  reason         String?
+  createdById    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, assetType, assetId, startsAt, endsAt])
+  @@index([branchId])
+}
+
+model BroadcastDevice {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+
+  serialNumber     String
+  alias            String
+  firmwareVersion  String?
+  deviceType       DeviceType
+  assetTag         String?
+  qrCodeIdentifier String?
+  purchaseDate     DateTime?
+  vendor           String?
+  warrantyExpiry   DateTime?
+  maintenanceStatus MaintenanceStatus @default(OK)
+  encryptedCredentials String?
+  credentialKeyVersion Int?
+  supportsCellular Boolean @default(true)
+  supportsEthernet Boolean @default(false)
+  supportsWifi     Boolean @default(false)
+  status           ResourceStatus @default(AVAILABLE)
+  notes            String?
+
+  lastSeenAt     DateTime?
+  lastOnlineAt   DateTime?
+  signalRssi     Int?
+  signalRsrp     Int?
+  signalRsrq     Int?
+  signalSinr     Int?
+  batteryLevel   Int?
+  firmwareStatus FirmwareStatus @default(UNKNOWN)
+
+  simSlots         DeviceSimSlot[]
+  eventAssignments EventDeviceAssignment[]
+  files            FileAsset[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([organizationId, serialNumber])
+  @@unique([organizationId, assetTag])
+  @@unique([organizationId, qrCodeIdentifier])
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model DeviceSimSlot {
+  id       String          @id @default(uuid())
+  deviceId String
+  device   BroadcastDevice @relation(fields: [deviceId], references: [id])
+
+  slotNumber Int
+  simId      String?
+  sim        SimCard? @relation(fields: [simId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([deviceId, slotNumber])
+  @@index([simId])
+}
+
+model SimCard {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+
+  phoneNumber           String
+  iccid                 String
+  imsi                  String?
+  carrier               Carrier
+  packageType           String?
+  packageRenewalDate    DateTime?
+  mainControllingNumber String?
+  apn                   String?
+  assetTag              String?
+  qrCodeIdentifier      String?
+  encryptedCredentials  String?
+  credentialKeyVersion  Int?
+  status                ResourceStatus @default(AVAILABLE)
+  notes                 String?
+
+  packageHistory   SimPackageHistory[]
+  usageMetrics     SimUsageMetric[]
+  deviceSlots      DeviceSimSlot[]
+  eventAssignments EventSimAssignment[]
+  routerAssignments Router[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([organizationId, phoneNumber])
+  @@unique([organizationId, iccid])
+  @@unique([organizationId, imsi])
+  @@unique([organizationId, assetTag])
+  @@unique([organizationId, qrCodeIdentifier])
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([carrier])
+  @@index([packageRenewalDate])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model SimPackageHistory {
+  id    String  @id @default(uuid())
+  simId String
+  sim   SimCard @relation(fields: [simId], references: [id])
+
+  rechargeDate DateTime
+  packageType  String
+  amount       Decimal  @db.Decimal(14, 2)
+  expiryDate   DateTime
+  notes        String?
+
+  recordedById String
+  recordedBy   User   @relation(fields: [recordedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([simId])
+  @@index([expiryDate])
+}
+
+model SimUsageMetric {
+  id    String  @id @default(uuid())
+  simId String
+  sim   SimCard @relation(fields: [simId], references: [id])
+
+  measuredAt        DateTime
+  uploadSpeedMbps   Decimal? @db.Decimal(10, 2)
+  downloadSpeedMbps Decimal? @db.Decimal(10, 2)
+  latencyMs         Int?
+  packetLossPercent Decimal? @db.Decimal(5, 2)
+  dataUsageMb       Decimal? @db.Decimal(14, 2)
+  source            String?
+
+  createdAt DateTime @default(now())
+
+  @@index([simId, measuredAt])
+}
+
+model AssetTelemetryMetric {
+  id             String    @id @default(uuid())
+  organizationId String
+  branchId       String?
+  assetType      AssetType
+  assetId        String
+  measuredAt     DateTime
+  heartbeatAt    DateTime?
+  signalRssi     Int?
+  signalRsrp     Int?
+  signalRsrq     Int?
+  signalSinr     Int?
+  batteryLevel   Int?
+  uploadSpeedMbps   Decimal? @db.Decimal(10, 2)
+  downloadSpeedMbps Decimal? @db.Decimal(10, 2)
+  latencyMs         Int?
+  packetLossPercent Decimal? @db.Decimal(5, 2)
+  bandwidthMbps     Decimal? @db.Decimal(10, 2)
+  source            String?
+  metadata          Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, assetType, assetId, measuredAt])
+  @@index([assetType, assetId])
+}
+
+model AssetOwnershipHistory {
+  id             String    @id @default(uuid())
+  organizationId String
+  branchId       String?
+  assetType      AssetType
+  assetId        String
+  assignedToUserId String
+  assignedToUser   User   @relation("AssetAssignedTo", fields: [assignedToUserId], references: [id])
+  assignedById     String
+  assignedBy       User   @relation("AssetAssignedBy", fields: [assignedById], references: [id])
+  assignedAt       DateTime @default(now())
+  returnedAt       DateTime?
+  notes            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, assetType, assetId])
+  @@index([assignedToUserId])
+  @@index([returnedAt])
+}
+
+model Router {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch?      @relation(fields: [branchId], references: [id])
+
+  brand                  String
+  model                  String
+  imei                   String
+  lanIp                  String?
+  wifiSsid               String?
+  wifiPasswordEncrypted  String?
+  wifiPasswordKeyVersion Int?
+  assetTag               String?
+  qrCodeIdentifier       String?
+  vendor                 String?
+  warrantyExpiry         DateTime?
+  maintenanceStatus      MaintenanceStatus @default(OK)
+  currentSimId           String?
+  currentSim             SimCard? @relation(fields: [currentSimId], references: [id])
+  status                 ResourceStatus @default(AVAILABLE)
+  lastSeenAt             DateTime?
+  lastOnlineAt           DateTime?
+  signalRssi             Int?
+  signalRsrp             Int?
+  signalRsrq             Int?
+  signalSinr             Int?
+  uploadSpeedMbps        Decimal? @db.Decimal(10, 2)
+  downloadSpeedMbps      Decimal? @db.Decimal(10, 2)
+  latencyMs              Int?
+  packetLossPercent      Decimal? @db.Decimal(5, 2)
+
+  eventAssignments EventRouterAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([organizationId, imei])
+  @@unique([organizationId, assetTag])
+  @@unique([organizationId, qrCodeIdentifier])
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model EventOperatorAssignment {
+  id         String           @id @default(uuid())
+  organizationId String
+  branchId       String?
+  eventId    String
+  operatorId String
+  status     AssignmentStatus @default(RESERVED)
+  startsAt   DateTime
+  endsAt     DateTime
+  effectiveStartsAt DateTime
+  effectiveEndsAt   DateTime
+  assignedById String?
+  releasedById String?
+  releasedAt   DateTime?
+  notes        String?
+
+  event    Event           @relation(fields: [eventId], references: [id])
+  operator OperatorProfile @relation(fields: [operatorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([operatorId, startsAt, endsAt])
+  @@index([eventId])
+  @@index([status])
+}
+
+model EventDeviceAssignment {
+  id       String           @id @default(uuid())
+  organizationId String
+  branchId       String?
+  eventId  String
+  deviceId String
+  status   AssignmentStatus @default(RESERVED)
+  startsAt DateTime
+  endsAt   DateTime
+  effectiveStartsAt DateTime
+  effectiveEndsAt   DateTime
+  assignedById String?
+  releasedById String?
+  releasedAt   DateTime?
+  notes        String?
+
+  event  Event           @relation(fields: [eventId], references: [id])
+  device BroadcastDevice @relation(fields: [deviceId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([deviceId, startsAt, endsAt])
+  @@index([eventId])
+  @@index([status])
+}
+
+model EventSimAssignment {
+  id       String           @id @default(uuid())
+  organizationId String
+  branchId       String?
+  eventId  String
+  simId    String
+  status   AssignmentStatus @default(RESERVED)
+  startsAt DateTime
+  endsAt   DateTime
+  effectiveStartsAt DateTime
+  effectiveEndsAt   DateTime
+  assignedById String?
+  releasedById String?
+  releasedAt   DateTime?
+  notes        String?
+
+  event Event   @relation(fields: [eventId], references: [id])
+  sim   SimCard @relation(fields: [simId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([simId, startsAt, endsAt])
+  @@index([eventId])
+  @@index([status])
+}
+
+model EventRouterAssignment {
+  id       String           @id @default(uuid())
+  organizationId String
+  branchId       String?
+  eventId  String
+  routerId String
+  status   AssignmentStatus @default(RESERVED)
+  startsAt DateTime
+  endsAt   DateTime
+  effectiveStartsAt DateTime
+  effectiveEndsAt   DateTime
+  assignedById String?
+  releasedById String?
+  releasedAt   DateTime?
+  notes        String?
+
+  event  Event  @relation(fields: [eventId], references: [id])
+  router Router @relation(fields: [routerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([routerId, startsAt, endsAt])
+  @@index([eventId])
+  @@index([status])
+}
+
+model Expense {
+  id             String          @id @default(uuid())
+  organizationId String
+  branchId       String?
+  eventId        String
+  operatorId     String
+  amount         Decimal         @db.Decimal(14, 2)
+  currency       String          @default("EGP")
+  category       ExpenseCategory
+  paymentMethod  String
+  notes          String?
+  status         ExpenseStatus   @default(DRAFT)
+  submittedAt    DateTime?
+  reviewedAt     DateTime?
+  reimbursedAt   DateTime?
+  approvalMetadata Json?
+  reimbursementMetadata Json?
+  ocrMetadata    Json?
+
+  createdById  String
+  approvedById String?
+  reviewedById String?
+  reimbursedById String?
+
+  event      Event           @relation(fields: [eventId], references: [id])
+  operator   OperatorProfile @relation(fields: [operatorId], references: [id])
+  createdBy  User            @relation("ExpenseCreatedBy", fields: [createdById], references: [id])
+  approvedBy User?           @relation("ExpenseApprovedBy", fields: [approvedById], references: [id])
+  reviewedBy User?           @relation("ExpenseReviewedBy", fields: [reviewedById], references: [id])
+  reimbursedBy User?         @relation("ExpenseReimbursedBy", fields: [reimbursedById], references: [id])
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  branch       Branch?       @relation(fields: [branchId], references: [id])
+  receipts   FileAsset[]
+  transaction FinancialTransaction?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([eventId])
+  @@index([operatorId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model FinancialTransaction {
+  id             String          @id @default(uuid())
+  organizationId String
+  type           TransactionType
+  description    String?
+  referenceType  String?
+  referenceId    String?
+  eventId        String?
+  createdById    String
+  expenseId      String?         @unique
+  payrollPayoutId String?        @unique
+  payrollAdjustmentId String?    @unique
+  currency       String          @default("EGP")
+  postedAt       DateTime        @default(now())
+  finalizedAt    DateTime?
+  metadata       Json?
+
+  event         Event?        @relation(fields: [eventId], references: [id])
+  organization  Organization  @relation(fields: [organizationId], references: [id])
+  createdBy     User          @relation("FinancialTransactionCreatedBy", fields: [createdById], references: [id])
+  expense       Expense?      @relation(fields: [expenseId], references: [id])
+  payrollPayout PayrollPayout? @relation(fields: [payrollPayoutId], references: [id])
+  payrollAdjustment PayrollAdjustment? @relation(fields: [payrollAdjustmentId], references: [id])
+  ledgerEntries LedgerEntry[]
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([organizationId])
+  @@index([referenceType, referenceId])
+  @@index([eventId])
+}
+
+model LedgerEntry {
+  id            String          @id @default(uuid())
+  transactionId String
+  accountCode   String
+  direction     LedgerDirection
+  amount        Decimal         @db.Decimal(14, 2)
+  description   String?
+  currency      String          @default("EGP")
+
+  transaction FinancialTransaction @relation(fields: [transactionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([accountCode])
+  @@index([transactionId])
+}
+
+model SalaryProfile {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  operatorId     String
+  salaryType     SalaryType
+  dailyRate      Decimal? @db.Decimal(14, 2)
+  eventRate      Decimal? @db.Decimal(14, 2)
+  monthlyRate    Decimal? @db.Decimal(14, 2)
+  overtimeRate   Decimal? @db.Decimal(14, 2)
+  currency       String   @default("EGP")
+  effectiveFrom  DateTime
+  effectiveTo    DateTime?
+  notes          String?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  branch       Branch?      @relation(fields: [branchId], references: [id])
+  operator     OperatorProfile @relation(fields: [operatorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([organizationId, operatorId])
+  @@index([branchId])
+  @@index([deletedAt])
+}
+
+model PayrollPeriod {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  name           String
+  startsAt       DateTime
+  endsAt         DateTime
+  status         PayrollPeriodStatus @default(OPEN)
+  finalizedAt    DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  branch       Branch?      @relation(fields: [branchId], references: [id])
+  payouts      PayrollPayout[]
+  adjustments  PayrollAdjustment[]
+  financialLocks FinancialLock[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, startsAt, endsAt])
+  @@index([status])
+}
+
+model PayrollPayout {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  payrollPeriodId String
+  operatorId     String
+  amount         Decimal @db.Decimal(14, 2)
+  currency       String  @default("EGP")
+  status         PayoutStatus @default(DRAFT)
+  paidAt         DateTime?
+  notes          String?
+  metadata       Json?
+  createdById    String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  branch       Branch?      @relation(fields: [branchId], references: [id])
+  payrollPeriod PayrollPeriod @relation(fields: [payrollPeriodId], references: [id])
+  operator     OperatorProfile @relation(fields: [operatorId], references: [id])
+  createdBy    User @relation("PayrollPayoutCreatedBy", fields: [createdById], references: [id])
+  transaction  FinancialTransaction?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([payrollPeriodId])
+  @@index([operatorId])
+  @@index([status])
+}
+
+model PayrollAdjustment {
+  id             String       @id @default(uuid())
+  organizationId String
+  branchId       String?
+  payrollPeriodId String?
+  operatorId     String
+  type           PayrollAdjustmentType
+  amount         Decimal @db.Decimal(14, 2)
+  currency       String  @default("EGP")
+  notes          String?
+  createdById    String
+  transaction    FinancialTransaction?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  branch       Branch?      @relation(fields: [branchId], references: [id])
+  payrollPeriod PayrollPeriod? @relation(fields: [payrollPeriodId], references: [id])
+  operator     OperatorProfile @relation(fields: [operatorId], references: [id])
+  createdBy    User @relation("PayrollAdjustmentCreatedBy", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([payrollPeriodId])
+  @@index([operatorId])
+  @@index([type])
+}
+
+model EventFinancialSnapshot {
+  id             String   @id @default(uuid())
+  eventId        String
+  organizationId String
+  estimatedBudget Decimal? @db.Decimal(14, 2)
+  estimatedRevenue Decimal? @db.Decimal(14, 2)
+  actualExpenses Decimal @default(0) @db.Decimal(14, 2)
+  actualPayouts  Decimal @default(0) @db.Decimal(14, 2)
+  actualRevenue  Decimal @default(0) @db.Decimal(14, 2)
+  actualProfit   Decimal @default(0) @db.Decimal(14, 2)
+  currency       String  @default("EGP")
+  calculatedAt   DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@index([eventId, calculatedAt])
+  @@index([organizationId])
+}
+
+model FinancialLock {
+  id             String @id @default(uuid())
+  organizationId String
+  eventId        String?
+  payrollPeriodId String?
+  lockType       FinancialLockType
+  reason         String?
+  lockedAt       DateTime @default(now())
+  lockedById     String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  event        Event?       @relation(fields: [eventId], references: [id])
+  payrollPeriod PayrollPeriod? @relation(fields: [payrollPeriodId], references: [id])
+  lockedBy     User @relation("FinancialLockCreatedBy", fields: [lockedById], references: [id])
+
+  @@index([organizationId, lockType])
+  @@index([eventId])
+  @@index([payrollPeriodId])
+}
+
+model EventActivityLog {
+  id        String @id @default(uuid())
+  eventId   String
+  event     Event  @relation(fields: [eventId], references: [id])
+
+  actorUserId String?
+  actorUser   User?   @relation(fields: [actorUserId], references: [id])
+  action      String
+  entityType  String?
+  entityId    String?
+  message     String
+  metadata    Json?
+  requestId   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId, createdAt])
+  @@index([entityType, entityId])
+  @@index([requestId])
+}
+
+model AuditLog {
+  id         String @id @default(uuid())
+  userId     String?
+  user       User?  @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  requestId  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([requestId])
+  @@index([createdAt])
+}
+
+model FileAsset {
+  id           String        @id @default(uuid())
+  organizationId String
+  branchId       String?
+  ownerType    FileOwnerType?
+  bucket       String
+  objectKey    String
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  uploadedById String?
+  uploadedBy   User?         @relation(fields: [uploadedById], references: [id])
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  branch       Branch?       @relation(fields: [branchId], references: [id])
+
+  eventId    String?
+  deviceId   String?
+  operatorId String?
+  expenseId  String?
+
+  event    Event?           @relation(fields: [eventId], references: [id])
+  device   BroadcastDevice? @relation(fields: [deviceId], references: [id])
+  operator OperatorProfile? @relation(fields: [operatorId], references: [id])
+  expense  Expense?         @relation(fields: [expenseId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([deviceId])
+  @@index([operatorId])
+  @@index([expenseId])
+}
+
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  title            String
+  body             String
+  type             String
+  channel          NotificationChannel       @default(IN_APP)
+  templateKey      String?
+  payload          Json?
+  scheduledAt      DateTime?
+  nextAttemptAt    DateTime?
+  isRead           Boolean                    @default(false)
+  priority         NotificationPriority       @default(NORMAL)
+  deliveryStatus   NotificationDeliveryStatus @default(PENDING)
+  deliveryAttempts Int                        @default(0)
+  deliveredAt      DateTime?
+  readAt           DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([priority])
+  @@index([deliveryStatus])
+  @@index([scheduledAt])
+}
+
+model NotificationTemplate {
+  id             String @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  key            String
+  channel        NotificationChannel
+  subject        String?
+  bodyTemplate   String
+  metadata       Json?
+  createdById    String?
+  createdBy      User? @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([organizationId, key, channel])
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model WorkerJob {
+  id             String @id @default(uuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  type           String
+  queue          String
+  status         WorkerJobStatus @default(QUEUED)
+  payload        Json
+  attempts       Int @default(0)
+  maxAttempts    Int @default(3)
+  runAt          DateTime @default(now())
+  lockedAt       DateTime?
+  lockedBy       String?
+  errorMessage   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([queue, status, runAt])
+  @@index([organizationId])
+}
+
+model AutomationRule {
+  id             String @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch? @relation(fields: [branchId], references: [id])
+  name           String
+  triggerType    AutomationTriggerType
+  scheduleCron   String?
+  conditions     Json?
+  actions        Json
+  status         AutomationRuleStatus @default(ACTIVE)
+  lastRunAt      DateTime?
+  nextRunAt      DateTime?
+  createdById    String
+  createdBy      User @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([organizationId, status])
+  @@index([triggerType])
+  @@index([nextRunAt])
+  @@index([deletedAt])
+}
+
+model ReportRun {
+  id             String @id @default(uuid())
+  organizationId String
+  branchId       String?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  branch         Branch? @relation(fields: [branchId], references: [id])
+  reportType     ReportType
+  exportFormat   ReportExportFormat @default(JSON)
+  filters        Json?
+  status         ReportRunStatus @default(QUEUED)
+  result         Json?
+  exportObjectKey String?
+  requestedById  String
+  requestedBy    User @relation(fields: [requestedById], references: [id])
+  completedAt    DateTime?
+  errorMessage   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, reportType, createdAt])
+  @@index([status])
+}
+
+model SyncClient {
+  id         String    @id @default(uuid())
+  name       String
+  userId     String?
+  lastSeenAt DateTime?
+  deviceId   String?
+  appVersion String?
+
+  operations SyncOperation[]
+  conflicts  SyncConflict[]
+
+  createdAt DateTime @default(now())
+}
+
+model SyncOperation {
+  id           String              @id @default(uuid())
+  clientId     String
+  client       SyncClient          @relation(fields: [clientId], references: [id])
+  organizationId String?
+  userId       String?
+  entityType   String
+  entityId     String
+  operation    String
+  payload      Json
+  status       SyncOperationStatus @default(QUEUED)
+  errorMessage String?
+  retryCount   Int @default(0)
+  baseVersion  DateTime?
+  clientMutationId String?
+
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+
+  @@index([clientId, status])
+  @@index([entityType, entityId])
+  @@index([organizationId, status])
+  @@unique([clientId, clientMutationId])
+}
+
+model SyncConflict {
+  id             String @id @default(uuid())
+  clientId       String
+  client         SyncClient @relation(fields: [clientId], references: [id])
+  organizationId String
+  entityType     String
+  entityId       String
+  serverVersion  Json?
+  clientVersion  Json?
+  baseVersion    DateTime?
+  status         SyncConflictStatus @default(OPEN)
+  resolution     SyncConflictResolution?
+  resolvedById   String?
+  resolvedBy     User? @relation("SyncConflictResolvedBy", fields: [resolvedById], references: [id])
+  resolvedAt     DateTime?
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, status])
+  @@index([entityType, entityId])
+}
+
+model OrganizationQuota {
+  id             String @id @default(uuid())
+  organizationId String @unique
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  maxUsers       Int @default(50)
+  maxStorageMb   Int @default(10240)
+  maxMonthlyApiRequests Int @default(100000)
+  storageUsedMb  Int @default(0)
+  apiRequestsThisMonth Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ApiUsageEvent {
+  id             String @id @default(uuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  userId         String?
+  route          String
+  method         String
+  statusCode     Int
+  durationMs     Int
+  requestId      String?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([route, createdAt])
+}

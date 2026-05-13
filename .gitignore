@@ -1,0 +1,49 @@
+node_modules
+.turbo
+.next
+dist
+build
+coverage
+.env
+.env.local
+.DS_Store
+*.log
+apps/desktop/src-tauri/target
+packages/database/prisma/migrations/migration_lock.toml
+# dependencies
+node_modules
+
+# environment
+.env
+.env.local
+.env.production
+
+# build
+dist
+.next
+out
+coverage
+
+# logs
+*.log
+
+# pnpm
+.pnpm-store
+.corepack
+
+# turbo
+.turbo
+
+# tauri
+src-tauri/target
+
+# prisma
+prisma/dev.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
