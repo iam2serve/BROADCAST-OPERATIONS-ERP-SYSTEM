@@ -51,7 +51,8 @@ services:
       dockerfile: docker/api.Dockerfile
     container_name: broadcast-erp-api
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       PORT: 4000
       DATABASE_URL: postgresql://broadcast:broadcast@postgres:5432/broadcast_erp?schema=public
@@ -75,7 +76,8 @@ services:
       dockerfile: docker/web.Dockerfile
     container_name: broadcast-erp-web
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       API_URL: http://api:4000
     ports:
@@ -90,7 +92,8 @@ services:
       dockerfile: docker/api.Dockerfile
     container_name: broadcast-erp-worker
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       PORT: 4001
       DATABASE_URL: postgresql://broadcast:broadcast@postgres:5432/broadcast_erp?schema=public

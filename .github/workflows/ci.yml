@@ -49,6 +49,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @broadcast/database prisma:validate
       - run: pnpm --filter @broadcast/database prisma:generate
+      - run: pnpm --filter @broadcast/types --filter @broadcast/auth --filter @broadcast/config --filter @broadcast/database build
       - run: pnpm --filter @broadcast/types --filter @broadcast/auth --filter @broadcast/database --filter @broadcast/api --filter @broadcast/web --filter @broadcast/desktop typecheck
       - run: pnpm --filter @broadcast/api lint
       - run: pnpm --filter @broadcast/web lint
