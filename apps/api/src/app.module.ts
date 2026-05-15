@@ -5,6 +5,7 @@ import { MetricsModule } from './common/metrics/metrics.module.js';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware.js';
 import { RequestLoggingMiddleware } from './common/middleware/request-logging.middleware.js';
 import { CsrfOriginMiddleware } from './common/security/csrf-origin.middleware.js';
+import { DatabaseModule } from './database/database.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { AnalyticsModule } from './modules/analytics/analytics.module.js';
 import { AssignmentsModule } from './modules/assignments/assignments.module.js';
@@ -29,8 +30,9 @@ import { SystemModule } from './system/system.module.js';
 
 @Module({
   imports: [
-    SystemModule,
+    DatabaseModule,
     MetricsModule,
+    SystemModule,
     AuthModule,
     UsersModule,
     OperatorsModule,

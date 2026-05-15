@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function bootstrapSession(): Promise<void> {
       try {
-        const currentUser = await getCurrentUser();
+        const currentUser = await getCurrentUser().catch(() => null);
 
         if (currentUser) {
           if (isMounted) {

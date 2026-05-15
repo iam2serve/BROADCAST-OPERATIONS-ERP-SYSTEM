@@ -19,6 +19,7 @@ FROM base AS runner
 ENV NODE_ENV=production
 COPY --from=build --chown=app:app /app/node_modules ./node_modules
 COPY --from=build --chown=app:app /app/packages ./packages
+COPY --from=build --chown=app:app /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=build --chown=app:app /app/apps/api/dist ./apps/api/dist
 COPY --from=build --chown=app:app /app/apps/api/package.json ./apps/api/package.json
 USER app

@@ -20,7 +20,7 @@ ALTER TABLE "EventDeviceAssignment"
 ADD CONSTRAINT event_device_no_overlap
 EXCLUDE USING gist (
   "deviceId" WITH =,
-  tstzrange("startsAt", "endsAt", '[)') WITH &&
+  tsrange("startsAt", "endsAt", '[)') WITH &&
 )
 WHERE ("status" IN ('RESERVED', 'ACTIVE'));
 
@@ -28,7 +28,7 @@ ALTER TABLE "EventSimAssignment"
 ADD CONSTRAINT event_sim_no_overlap
 EXCLUDE USING gist (
   "simId" WITH =,
-  tstzrange("startsAt", "endsAt", '[)') WITH &&
+  tsrange("startsAt", "endsAt", '[)') WITH &&
 )
 WHERE ("status" IN ('RESERVED', 'ACTIVE'));
 
@@ -36,7 +36,7 @@ ALTER TABLE "EventRouterAssignment"
 ADD CONSTRAINT event_router_no_overlap
 EXCLUDE USING gist (
   "routerId" WITH =,
-  tstzrange("startsAt", "endsAt", '[)') WITH &&
+  tsrange("startsAt", "endsAt", '[)') WITH &&
 )
 WHERE ("status" IN ('RESERVED', 'ACTIVE'));
 
@@ -44,7 +44,7 @@ ALTER TABLE "EventOperatorAssignment"
 ADD CONSTRAINT event_operator_no_overlap
 EXCLUDE USING gist (
   "operatorId" WITH =,
-  tstzrange("startsAt", "endsAt", '[)') WITH &&
+  tsrange("startsAt", "endsAt", '[)') WITH &&
 )
 WHERE ("status" IN ('RESERVED', 'ACTIVE'));
 

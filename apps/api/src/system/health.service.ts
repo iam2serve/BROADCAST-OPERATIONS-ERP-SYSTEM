@@ -46,21 +46,33 @@ export class HealthService {
   }
 
   private async checkQueue(): Promise<Check> {
-    const queued = await this.prisma.workerJob.count({ where: { status: 'QUEUED' } });
-    const failed = await this.prisma.workerJob.count({ where: { status: 'FAILED' } });
-    return { status: failed > 100 ? 'degraded' : 'ok', detail: `queued=${queued};failed=${failed}` };
+    try {
+      const queued = await this.prisma.workerJob.count({ where: { status: 'QUEUED' } });
+      const failed = await this.prisma.workerJob.count({ where: { status: 'FAILED' } });
+      return { status: failed > 100 ? 'degraded' : 'ok', detail: `queued=${queued};failed=${failed}` };
+    } catch (error) {
+      return { status: 'degraded', detail: error instanceof Error ? error.message : 'queue unavailable' };
+    }
   }
 
   private async checkWorkers(): Promise<Check> {
-    const staleProcessing = await this.prisma.workerJob.count({
-      where: { status: 'PROCESSING', lockedAt: { lt: new Date(Date.now() - 15 * 60_000) } },
-    });
-    return { status: staleProcessing > 0 ? 'degraded' : 'ok', detail: `staleProcessing=${staleProcessing}` };
+    try {
+      const staleProcessing = await this.prisma.workerJob.count({
+        where: { status: 'PROCESSING', lockedAt: { lt: new Date(Date.now() - 15 * 60_000) } },
+      });
+      return { status: staleProcessing > 0 ? 'degraded' : 'ok', detail: `staleProcessing=${staleProcessing}` };
+    } catch (error) {
+      return { status: 'degraded', detail: error instanceof Error ? error.message : 'worker health unavailable' };
+    }
   }
 
   private async checkSync(): Promise<Check> {
-    const openConflicts = await this.prisma.syncConflict.count({ where: { status: 'OPEN' } });
-    return { status: openConflicts > 500 ? 'degraded' : 'ok', detail: `openConflicts=${openConflicts}` };
+    try {
+      const openConflicts = await this.prisma.syncConflict.count({ where: { status: 'OPEN' } });
+      return { status: openConflicts > 500 ? 'degraded' : 'ok', detail: `openConflicts=${openConflicts}` };
+    } catch (error) {
+      return { status: 'degraded', detail: error instanceof Error ? error.message : 'sync health unavailable' };
+    }
   }
 
   private async checkStorage(): Promise<Check> {

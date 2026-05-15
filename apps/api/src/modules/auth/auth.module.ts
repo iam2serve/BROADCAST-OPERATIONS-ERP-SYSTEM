@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 
 import { DatabaseModule } from '../../database/database.module.js';
+import { SystemModule } from '../../system/system.module.js';
 import { AuditModule } from '../audit/audit.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { AuthController } from './auth.controller.js';
@@ -15,7 +16,7 @@ import { PasswordService } from './services/password.service.js';
 import { TokenService } from './services/token.service.js';
 
 @Module({
-  imports: [DatabaseModule, AuditModule, UsersModule, JwtModule.register({})],
+  imports: [DatabaseModule, SystemModule, AuditModule, UsersModule, JwtModule.register({})],
   controllers: [AuthController],
   providers: [
     AuthService,

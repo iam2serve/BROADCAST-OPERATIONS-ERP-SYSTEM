@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@broadcast/auth": ["packages/auth/dist/index.d.ts"],
+      "@broadcast/config": ["packages/config/dist/index.d.ts"],
+      "@broadcast/database": ["packages/database/dist/index.d.ts"],
+      "@broadcast/types": ["packages/types/dist/index.d.ts"],
+      "@broadcast/ui": ["packages/ui/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["test/**/*.ts", "dist", "node_modules"]
+}

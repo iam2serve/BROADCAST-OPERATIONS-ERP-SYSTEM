@@ -13,7 +13,17 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+function getApiUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.hostname}:4000/api/v1`;
+  }
+
+  return 'http://api:4000/api/v1';
+}
 
 export function AcceptInviteForm() {
   const router = useRouter();
@@ -29,7 +39,7 @@ export function AcceptInviteForm() {
 
   async function onSubmit(values: Values): Promise<void> {
     setError(null);
-    const response = await fetch(`${apiUrl}/users/accept-invite`, {
+    const response = await fetch(`${getApiUrl()}/users/accept-invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(values),

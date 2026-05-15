@@ -1,11 +1,21 @@
 import type { ApiResponse, AuthUser, LoginResponse } from '@broadcast/types';
 
-import { readAccessToken, readRefreshToken, saveTokens } from './token-storage';
+import { clearTokens, readAccessToken, readRefreshToken, saveTokens } from './token-storage';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+export function getApiUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.hostname}:4000/api/v1`;
+  }
+
+  return 'http://api:4000/api/v1';
+}
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${apiUrl}${path}`, {
+  const response = await fetch(`${getApiUrl()}${path}`, {
     ...init,
     credentials: 'include',
     headers: {
@@ -39,13 +49,18 @@ export async function refreshSession(): Promise<LoginResponse | null> {
     return null;
   }
 
-  const result = await request<LoginResponse>('/auth/refresh', {
-    method: 'POST',
-    body: JSON.stringify({ refreshToken }),
-  });
+  try {
+    const result = await request<LoginResponse>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    });
 
-  saveTokens(result.tokens);
-  return result;
+    saveTokens(result.tokens);
+    return result;
+  } catch {
+    clearTokens();
+    return null;
+  }
 }
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
