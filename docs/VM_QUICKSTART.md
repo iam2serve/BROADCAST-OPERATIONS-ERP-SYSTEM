@@ -22,6 +22,21 @@ CSRF_TRUSTED_ORIGINS=http://192.168.2.8:3000,http://localhost:3000
 
 Keep `NEXT_PUBLIC_API_URL` empty for VM testing. The web app will call the API on the same host at port `4000`.
 
+If the VM IP changes often, run:
+
+```bash
+chmod +x scripts/update-vm-ip.sh
+./scripts/update-vm-ip.sh
+```
+
+Or pass the IP manually:
+
+```bash
+./scripts/update-vm-ip.sh 192.168.56.104
+```
+
+The script updates `.env` and recreates the `api` and `web` containers.
+
 ## 2. Start infrastructure
 
 ```bash
